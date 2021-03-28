@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using Utils;
+using Collision = Structs.Collision;
 using Event = Utils.Event;
 
 public class PaddleCollisionDetector : MonoBehaviour
@@ -10,12 +11,12 @@ public class PaddleCollisionDetector : MonoBehaviour
     private BoxCollider2D boxCollider;
     private Vector2 ballDirection;
     
-    private bool ballTouchPaddle;
+    private bool ballTouchingPaddle;
 
     private Vector3 previousBallPosition;
     private Vector3 previousClosestPoint;
     
-    private UnityEvent<Vector2> paddleCollision = new UnityEvent<Vector2>();
+    private readonly UnityEvent<Vector2> paddleCollision = new UnityEvent<Vector2>();
 
     private void Awake()
     {
@@ -45,20 +46,20 @@ public class PaddleCollisionDetector : MonoBehaviour
     {
         var closestPoint = boxCollider.ClosestPoint(ballTransform.position);
         var sqrDistance = Vector2.SqrMagnitude((Vector2) ballTransform.position - closestPoint);
-        if (sqrDistance > Config.sqrBallRadius)
+        if (sqrDistance > Config.SqrBallRadius)
         {
             previousBallPosition = ballTransform.position;
             previousClosestPoint = closestPoint;
-            ballTouchPaddle = false;
+            ballTouchingPaddle = false;
             return;
         }
         
-        if (ballTouchPaddle) return;
+        if (ballTouchingPaddle) return;
 
-        Collision collision = GetCollision(closestPoint);
+        var collision = GetCollision(closestPoint);
         var newDirection = LinAlg.CalculateNewDirection(collision, ballDirection);
         newDirection = (newDirection + paddleMover.PaddleDirection).normalized;
-        ballTouchPaddle = true;
+        ballTouchingPaddle = true;
 
         paddleCollision.Invoke(newDirection);
     }
@@ -71,18 +72,18 @@ public class PaddleCollisionDetector : MonoBehaviour
         {
             collision = new Collision
             {
-                ballPosition = previousBallPosition,
-                point = previousClosestPoint,
-                gameObject = gameObject
+                BallPosition = previousBallPosition,
+                Point = previousClosestPoint,
+                GameObject = gameObject
             };
         }
         else
         {
             collision = new Collision
             {
-                ballPosition = ballTransform.position,
-                point = closestPoint,
-                gameObject = gameObject
+                BallPosition = ballTransform.position,
+                Point = closestPoint,
+                GameObject = gameObject
             };
         }
 

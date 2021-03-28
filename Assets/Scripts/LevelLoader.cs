@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using Structs;
 using UnityEngine;
 
 public class LevelLoader : MonoBehaviour 
 {
-    void Start()
+    private void Start()
     {
         var lines = LinesReader.GetLines();
         var linePrefab = LoadBoundLinePrefab();
@@ -23,8 +24,8 @@ public class LevelLoader : MonoBehaviour
             var lineRenderer = Instantiate(linePrefab, Vector3.zero, Quaternion.identity).GetComponent<LineRenderer>();
             var coordinates = new[]
             {
-                new Vector3(line.start.x, line.start.y, 0), 
-                new Vector3(line.end.x, line.end.y, 0)
+                new Vector3(line.Start.x, line.Start.y, 0), 
+                new Vector3(line.End.x, line.End.y, 0)
             };
             lineRenderer.SetPositions(coordinates);
             SetEdgeColliders(lineRenderer, coordinates);
@@ -48,7 +49,6 @@ public class LevelLoader : MonoBehaviour
 
         AddCollider(lineRenderer.gameObject, colliderPoint1, colliderPoint3);
         AddCollider(lineRenderer.gameObject, colliderPoint2, colliderPoint4);
-
     }
 
     private void AddCollider(GameObject line, Vector2 point1, Vector2 point2)

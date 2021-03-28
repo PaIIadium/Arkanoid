@@ -18,6 +18,9 @@ namespace Utils
         private static Dictionary<Event, List<UnityAction<Vector2>>> listeners = 
             new Dictionary<Event, List<UnityAction<Vector2>>>();
 
+        public static readonly UnityEvent<Vector2, Vector2, GameObject> LineCollision =
+            new UnityEvent<Vector2, Vector2, GameObject>();
+
         public static void SubscribeOnEvent(Event eventName, UnityAction<Vector2> listener)
         {
             if (!listeners.ContainsKey(eventName)) InitializeEvent(eventName);

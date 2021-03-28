@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-
 enum Direction { Left, Right }
 
 public class PaddleMover : MonoBehaviour

@@ -1,15 +1,18 @@
 ﻿using UnityEngine;
 
-public struct Collision
+namespace Structs
 {
-    public Vector2 ballPosition;
-    public Vector2 point;
-    public GameObject gameObject;
-
-    public static Collision defaultCollision = new Collision
+    public struct Collision
     {
-        ballPosition = Vector2.negativeInfinity,
-        point = Vector2.negativeInfinity,
-        gameObject = null
-    };
+        public Vector2 BallPosition;
+        public Vector2 Point;
+        public GameObject GameObject;
+
+        public static Collision DefaultCollision = new Collision
+        {
+            BallPosition = Vector2.negativeInfinity,
+            Point = Vector2.negativeInfinity,
+            GameObject = null
+        };
+    }
 }

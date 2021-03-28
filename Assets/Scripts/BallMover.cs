@@ -11,7 +11,7 @@ public class BallMover : MonoBehaviour
     private Vector2 nextDirection;
     private Vector2 nextCollisionPoint;
     private GameObject nextHitGameObject;
-    public Vector2 Displacement { get; private set; }
+    private Vector2 Displacement { get; set; }
     private UnityEvent<Vector2> moveDirectionChanged = new UnityEvent<Vector2>();
     
     private Vector2 Direction
@@ -19,7 +19,7 @@ public class BallMover : MonoBehaviour
         set
         {
             direction = value;
-            Displacement = CalculateDisplacement(Direction, Config.ballSpeed);
+            Displacement = CalculateDisplacement(Direction, Config.BallSpeed);
             moveDirectionChanged.Invoke(value);
         }
         get => direction;
@@ -29,15 +29,10 @@ public class BallMover : MonoBehaviour
     {
         EventEmitter.AddEvent(Event.MoveDirectionChanged, moveDirectionChanged);
         EventEmitter.SubscribeOnEvent(Event.PaddleCollision, OnPaddleCollision);
-        Direction = Config.startDirection;
+        EventEmitter.LineCollision.AddListener(OnLineCollision);
+        Direction = Config.StartDirection;
     }
     
-    private void FixedUpdate()
-    {
-        MoveBall();
-        CheckCollision();
-    }
-
     private Vector2 CalculateDisplacement(Vector2 dir, float magnitude)
     {
         return dir * (magnitude * Time.fixedDeltaTime);
@@ -57,6 +52,12 @@ public class BallMover : MonoBehaviour
         Direction = nextDirection;
     }
 
+    private void FixedUpdate()
+    {
+        MoveBall();
+        CheckCollision();
+    }
+    
     private void MoveBall()
     {
         var position = transform.position;
@@ -71,7 +72,7 @@ public class BallMover : MonoBehaviour
         BounceOff(false);
     }
 
-    public void OnHit(Vector2 newDirection, Vector2 collisionPoint, GameObject hitGameObject)
+    private void OnLineCollision(Vector2 newDirection, Vector2 collisionPoint, GameObject hitGameObject)
     {
         nextDirection = newDirection;
         nextHitGameObject = hitGameObject;
@@ -83,6 +84,6 @@ public class BallMover : MonoBehaviour
     private bool IsCollide(Vector2 collisionPoint)
     {
         var sqrDistance = ((Vector2) transform.position - collisionPoint).sqrMagnitude;
-        return sqrDistance < Config.sqrBallRadius;
+        return sqrDistance < Config.SqrBallRadius;
     }
 }

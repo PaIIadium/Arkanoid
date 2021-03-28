@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Structs;
 using UnityEngine;
+using Collision = Structs.Collision;
 
 namespace Utils
 {
@@ -12,7 +14,7 @@ namespace Utils
             var edgeColliders = GetAllEdgeColliders(hits);
             var collisions = GetAllCollisions(edgeColliders, moveDirection, transformPosition);
             
-            return collisions.Count == 0 ? Collision.defaultCollision 
+            return collisions.Count == 0 ? Collision.DefaultCollision 
                 : ChooseClosestCollision(collisions, transformPosition);
         }
 
@@ -39,11 +41,11 @@ namespace Utils
                 lineEnds[1] += (Vector2) collider.gameObject.transform.position;
                 var colliderLine = new Line
                 {
-                    start = new Vector2(lineEnds[0].x, lineEnds[0].y),
-                    end = new Vector2(lineEnds[1].x, lineEnds[1].y)
+                    Start = new Vector2(lineEnds[0].x, lineEnds[0].y),
+                    End = new Vector2(lineEnds[1].x, lineEnds[1].y)
                 };
                 var collision = CalculateCollision(colliderLine, moveDirection, transformPosition, collider.gameObject);
-                if (!collision.Equals(Collision.defaultCollision)) collisions.Add(collision);
+                if (!collision.Equals(Collision.DefaultCollision)) collisions.Add(collision);
             }
 
             return collisions;
@@ -52,10 +54,10 @@ namespace Utils
         private static Collision ChooseClosestCollision(List<Collision> collisions, Vector2 transformPosition)
         {
             var closestCollision = collisions[0];
-            var closestSqrDistance = Vector2.SqrMagnitude(transformPosition - collisions[0].ballPosition);
+            var closestSqrDistance = Vector2.SqrMagnitude(transformPosition - collisions[0].BallPosition);
             foreach (var collision in collisions.Skip(1))
             {
-                var sqrDistance = Vector2.SqrMagnitude(transformPosition - collision.ballPosition);
+                var sqrDistance = Vector2.SqrMagnitude(transformPosition - collision.BallPosition);
                 if (sqrDistance > closestSqrDistance) continue;
                 closestCollision = collision;
                 closestSqrDistance = sqrDistance;
@@ -74,9 +76,9 @@ namespace Utils
             var x4 = forwardPoint.x;
             var y4 = forwardPoint.y;
 
-            var a = line.end.y - line.start.y; // coefficients of the straight line of collider
-            var b = line.start.x - line.end.x;
-            var c = line.start.y * line.end.x - line.start.x * line.end.y;
+            var a = line.End.y - line.Start.y; // coefficients of the straight line of collider
+            var b = line.Start.x - line.End.x;
+            var c = line.Start.y * line.End.x - line.Start.x * line.End.y;
 
             var q = a * a + b * b;
             var s = y3 - y4;
@@ -85,7 +87,7 @@ namespace Utils
             
             var denominator = u * a + s * b;
             var h = a * w;
-            var e = Config.ballRadius * Mathf.Sqrt(q);
+            var e = Config.BallRadius * Mathf.Sqrt(q);
 
             var y5_1 = (h + (e - c) * s) / denominator; // ball position in first collision
             var x5_1 = u * (y5_1 - y4) / s + x4;
@@ -99,21 +101,21 @@ namespace Utils
             var collisionPoint2 = CalculateCollisionPoint(ballPosition2, a, b, c, q);
 
             var collision = Vector2.Dot(moveDirection, collisionPoint1 - ballPosition1) > 0 ? 
-                new Collision {ballPosition = ballPosition1, point = collisionPoint1, gameObject = go} : 
-                new Collision {ballPosition = ballPosition2, point = collisionPoint2, gameObject = go};
+                new Collision {BallPosition = ballPosition1, Point = collisionPoint1, GameObject = go} : 
+                new Collision {BallPosition = ballPosition2, Point = collisionPoint2, GameObject = go};
             
-            var correctedCollisionPoint = CheckLineEnds(collision.point, line.start, line.end); 
-            if (correctedCollisionPoint == collision.point) return collision;
+            var correctedCollisionPoint = CheckLineEnds(collision.Point, line.Start, line.End); 
+            if (correctedCollisionPoint == collision.Point) return collision;
             
-            collision.point = correctedCollisionPoint;
+            collision.Point = correctedCollisionPoint;
             // Coefficients of the straight line of ball trajectory:
             // a = -s; b = u; c = -w;
-            collision.ballPosition = CorrectBallPosition(-s, u, -w, correctedCollisionPoint, transformPosition);
+            collision.BallPosition = CorrectBallPosition(-s, u, -w, correctedCollisionPoint, transformPosition);
             
-            if (collision.ballPosition == Vector2.negativeInfinity) 
-                return Collision.defaultCollision;
-            if (Vector2.Dot(moveDirection, collision.point - collision.ballPosition) < 0) 
-                return Collision.defaultCollision;
+            if (collision.BallPosition == Vector2.negativeInfinity) 
+                return Collision.DefaultCollision;
+            if (Vector2.Dot(moveDirection, collision.Point - collision.BallPosition) < 0) 
+                return Collision.DefaultCollision;
             return collision;
         }
 
@@ -160,7 +162,7 @@ namespace Utils
             var y3 = collisionPoint.y;
             var a1 = b * b + a * a; // coefficients of quadratic equation
             var b1 = 2 * b * c + 2 * a * x3 * b - 2 * a * a * y3;
-            var c1 = c * c + 2 * a * x3 * c + a * a * x3 * x3 + a * a * y3 * y3 - a * a * Config.sqrBallRadius;
+            var c1 = c * c + 2 * a * x3 * c + a * a * x3 * x3 + a * a * y3 * y3 - a * a * Config.SqrBallRadius;
             var (y1, y2) = SolveQuadraticEquation(a1, b1, c1);
             if (y1 is float.NaN) return Vector2.negativeInfinity;
             var x1 = (-b * y1 - c) / a;
@@ -181,7 +183,7 @@ namespace Utils
 
         private static bool AreFloatsEqual(float num1, float num2)
         {
-            return Mathf.Abs(num2 - num1) < Config.floatTolerance;
+            return Mathf.Abs(num2 - num1) < Config.FloatTolerance;
         }
         
         private static (float, float) SolveQuadraticEquation(float a, float b, float c)
@@ -208,9 +210,9 @@ namespace Utils
 
         private static Vector2 CalculateNormalVector(Collision collision, Vector2 moveDirection)
         {
-            var normalVector = (collision.point - collision.ballPosition).normalized;
+            var normalVector = (collision.Point - collision.BallPosition).normalized;
             if (Vector2.Dot(normalVector, moveDirection) < 0) normalVector *= -1;
-            Debug.DrawLine(collision.point - normalVector, collision.point, Color.blue);
+            Debug.DrawLine(collision.Point - normalVector, collision.Point, Color.blue);
             return normalVector;
         }
     }
